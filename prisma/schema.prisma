@@ -1,0 +1,77 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Define the User model
+model User {
+  id             Int              @id @default(autoincrement())
+  username       String           @unique
+  email          String           @unique
+  password       String
+  created_at     DateTime         @default(now())
+  role           String           @default("user")
+  ownedProjects  Project[]
+  projectMembers ProjectMembers[]
+  tasks          Task[]           @relation("AllTasks")
+  createdTasks   Task[]           @relation("CreatedBy")
+  assignedTasks  Task[]           @relation("AssignedTo")
+}
+
+// Define the Project model
+model Project {
+  id             Int              @id @default(autoincrement())
+  name           String
+  description    String
+  created_at     DateTime         @default(now())
+  projectMembers ProjectMembers[]
+  tasks          Task[] // Define the relationship with tasks
+  user           User             @relation(fields: [user_id], references: [id])
+  user_id        Int
+}
+
+// Define the intermediate table for the many-to-many relationship
+model ProjectMembers {
+  user       User    @relation(fields: [user_id], references: [id])
+  user_id    Int
+  project    Project @relation(fields: [project_id], references: [id])
+  project_id Int
+
+  @@id([user_id, project_id])
+}
+
+// Define the Task model
+model Task {
+  id             Int          @id @default(autoincrement())
+  title          String
+  description    String?
+  due_date       DateTime?
+  completed      Boolean      @default(false)
+  project_id     Int
+  created_at     DateTime     @default(now())
+  project        Project      @relation(fields: [project_id], references: [id])
+  attachments    Attachment[]
+  user_id        Int
+  user           User         @relation(fields: [user_id], references: [id], name: "CreatedBy")
+  assignedUser   User?        @relation(fields: [assignedUserId], references: [id], name: "AssignedTo")
+  assignedUserId Int?
+  users          User[]       @relation("AllTasks")
+}
+
+// Define the Attachment model
+model Attachment {
+  id           Int      @id @default(autoincrement())
+  originalname String
+  filename     String
+  path         String
+  task_id      Int
+  created_at   DateTime @default(now())
+  task         Task     @relation(fields: [task_id], references: [id])
+}
