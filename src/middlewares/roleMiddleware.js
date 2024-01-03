@@ -4,6 +4,7 @@ const prisma = new PrismaClient();
 const roleMiddleware = (requiredRole) => async (req, res, next) => {
   const { role, id } = req.user;
 
+  
   try {
     let ownerId;
 
