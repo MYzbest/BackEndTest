@@ -100,8 +100,8 @@ npm test
 
 ### User Endpoints
 
-- POST /api/users: Register a new user
-- POST /api/users/login: Log in a user
+- POST /api/auth: Register a new user
+- POST /api/auth/login: Log in a user
 
 ### Task Endpoints
 
